@@ -31,6 +31,57 @@ var group_settings = {
 	'11': [['1', 'one'], ['11', 'eleven']],
 	'12': [['2', 'two'], ['3', 'three'], ['4', 'four'], ['6', 'six']],
 };
+var checkbox_vals = ['1', '2', '3', '4', '5', '6', '7', '11'];
+var boxes = {
+	'1': {
+		'label': 'one',
+		'groups': [
+			'1', '2', '3', '5', '7', '11'
+		]
+	},
+	'2': {
+		'label': 'two',
+		'groups': [
+			'2', '4', '6', '8', '10', '12'
+		]
+	},
+	'3': {
+		'label': 'three',
+		'groups': [
+			'3', '6', '9', '12'
+		]
+	},
+	'4': {
+		'label': 'four',
+		'groups': [
+			'8', '12'
+		]
+	},
+	'5': {
+		'label': 'five',
+		'groups': [
+			'5', '10'
+		]
+	},
+	'6': {
+		'label': 'six',
+		'groups': [
+			'12'
+		]
+	},
+	'7': {
+		'label': 'seven',
+		'groups': [
+			'7',
+		]
+	},
+	'11': {
+		'label': 'eleven',
+		'groups': [
+			'11',
+		]
+	},
+};
 
 module("init test", {
 	setup: function() {
@@ -46,4 +97,29 @@ test("Select box becomes disabled", 1, function() {
 	$(select_selector).fieldGroup(group_settings, {});
 
 	equals($(select_selector).attr('disabled'), true);
+});
+
+test("Checkbox building", function() {
+	var fg = $(select_selector).fieldGroup(group_settings, {});
+
+	var built_checkboxes = fg._build_checkboxes(group_settings);
+
+	for(var i in built_checkboxes) {
+		same(built_checkboxes[i], boxes[i]);
+	}
+	for(var i in boxes) {
+		same(built_checkboxes[i], boxes[i]);
+	}
+});
+
+test("Checkboxes created", function() {
+	$(select_selector).fieldGroup(group_settings, {});
+
+	var num_checkboxes_expected = 0;
+	for(var i in boxes) {
+		num_checkboxes_expected++;
+	}
+	var checkboxes = $(testArea).find('input[type=checkbox]');
+
+	equals(checkboxes.length, num_checkboxes_expected);
 });
