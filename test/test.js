@@ -112,7 +112,7 @@ test("Checkbox building", function() {
 	}
 });
 
-test("Checkboxes created", function() {
+test("Checkboxes created", 1, function() {
 	$(select_selector).fieldGroup(group_settings, {});
 
 	var num_checkboxes_expected = 0;
@@ -122,4 +122,20 @@ test("Checkboxes created", function() {
 	var checkboxes = $(testArea).find('input[type=checkbox]');
 
 	equals(checkboxes.length, num_checkboxes_expected);
+});
+
+test("Checkbox defaults checked", 3, function() {
+	$(select_selector).fieldGroup(group_settings, {});
+
+	// Should be the 1 and 2 checkboxes checked and nothing else
+	var checked = $(testArea).find(':checked');
+
+	equals(checked.length, 2);
+
+	checked.each(function(index, element) {
+		var val = $(element).val();
+		ok(val == '1' || val == '2', "Proper boxes are checked");
+	});
+
+
 });
