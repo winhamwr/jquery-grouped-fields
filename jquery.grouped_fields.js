@@ -46,6 +46,17 @@ FieldGroup.prototype.init = function() {
 	// Make sure the required boxes are selected to start
 	this.update_boxes_from_select(this.$select_element);
 
+	var box_class = this.settings['field_prefix'] + 'box';
+	var fg = this;
+	fg.updating_boxes = false;
+	$('.'+box_class).change(function() {
+		if(fg.updating_boxes == true){
+			return;
+		}
+		fg.updating_boxes = true;
+		fg.disable_invalid_boxes();
+		fg.updating_boxes = false;
+	});
 };
 
 FieldGroup.prototype.update_boxes_from_select = function($select_element) {
@@ -68,6 +79,51 @@ FieldGroup.prototype.check_boxes = function(group_val) {
 		var box_id = this.settings['field_prefix'] + 'box_' + box_val;
 		$('#'+box_id).attr('checked', true);
 	}
+};
+
+/*
+ * Disable any boxes that aren't valid given the current set of checked boxes.
+ */
+FieldGroup.prototype.disable_invalid_boxes = function() {
+	var box_class = this.settings['field_prefix'] + 'box';
+	var checked_boxes = $('.'+box_class+':checked');
+
+	var possible_groups = [];
+
+	var fg = this;
+	// Figure out which groups are still possible
+	checked_boxes.each(function(i) {
+		var box_val = $(this).val();
+		if(possible_groups.length == 0) {
+			// When the list is empty, add the first available
+			possible_groups += fg.checkbox_confs[box_val]['groups'];
+		}else {
+			// Only keep the intersection
+			var new_groups = fg.checkbox_confs[box_val]['groups'];
+			var new_possible_groups = [];
+			for(var i in possible_groups){
+				var possible_group = possible_groups[i];
+				if(possible_group in new_groups){
+					new_possible_groups.push(possible_group);
+				}
+			}
+			possible_groups = new_possible_groups;
+		}
+	});
+
+	// Disable all of the boxes
+	$('.'+box_class).attr('disabled', true);
+
+	// Enable all of the boxes that are still possible for their groups
+	for(var i in possible_groups) {
+		var box_infos = possible_groups[i];
+		for(var box_i in box_infos) {
+			var box_val = box_infos[box_i][0];
+			var box_id = this.settings['field_prefix'] + 'box_' + box_val;
+			$('#'+box_id).attr('disabled', false);
+		}
+	}
+
 };
 
 /*
@@ -107,7 +163,7 @@ FieldGroup.prototype._create_checkboxes = function(element, boxes) {
 		var box_id = field_prefix + 'box_' + box_val;
 		var box_name = field_prefix + 'box';
 		var label = box['label'];
-		var classes = box_name;
+		var classes = box_name+' ';
 		for(var i in box['groups']) {
 			classes += field_prefix + 'group_' + box['groups'][i] + ' ';
 		}

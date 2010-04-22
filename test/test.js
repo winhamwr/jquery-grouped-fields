@@ -83,7 +83,7 @@ var boxes = {
 	},
 };
 
-module("init test", {
+module("init", {
 	setup: function() {
 		$('body').append('<div id="testarea"></div>');
 		$(testArea).append(form_html);
@@ -137,5 +137,53 @@ test("Checkbox defaults checked", 3, function() {
 		ok(val == '1' || val == '2', "Proper boxes are checked");
 	});
 
+});
 
+test("Checkbox defaults no initial", 1, function() {
+	//Unselect any of the selections
+	$(select_selector).find(':selected').attr('selected', false);
+	$(select_selector).append('<option selected="selected" value="">----</option>');
+
+	$(select_selector).fieldGroup(group_settings, {});
+
+	// Should be none checked
+	var checked = $(testArea).find(':checked');
+
+	equals(checked.length, 0);
+});
+
+module("checkbox interaction", {
+	setup: function() {
+		$('body').append('<div id="testarea"></div>');
+		$(testArea).append(form_html);
+	},
+	teardown: function() {
+		$(testArea).remove();
+	}
+});
+
+test("Invalids disabled on click", 5, function() {
+	//Unselect any of the selections
+	$(select_selector).find(':selected').attr('selected', false);
+	$(select_selector).append('<option selected="selected" value="">----</option>');
+
+	$(select_selector).fieldGroup(group_settings, {});
+
+	// Check the 11. Should auto-check 1 and disable all but 1 and 11
+	$(testArea).find('#jqgf_box_11').attr('checked', true);
+	$(testArea).find('#jqgf_box_11').change();
+
+	// All of the other checkboxes except 1 and 11 should be disabled
+	var disabled_boxes = $(testArea).find('input[type=checkbox]:disabled');
+	equals(disabled_boxes.length, 6);
+
+	var enabled_boxes = $(testArea).find('input[type=checkbox]:not(:disabled)');
+	equals(enabled_boxes.length, 2);
+
+	enabled_boxes.each(function(index, element) {
+		var val = $(element).val();
+		ok(val == '1' || val == '11', "Proper boxes are enabled");
+		equals($(element).checked, true);
+	});
+	equals(checked.val(), '11');
 });
